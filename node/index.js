@@ -8,15 +8,25 @@ const config = {
     database:'nodedb'
 };
 const mysql = require('mysql')
-const connection = mysql.createConnection(config)
-
-const sql = `INSERT INTO people(name) values('Wesley')`
-connection.query(sql)
-connection.end()
+const faker = require('faker');
 
 
 app.get('/', (req,res) => {
-    res.send('<h1>Full Cycle</h1>')
+    const connection = mysql.createConnection(config);
+    const randomName = faker.name.findName();
+    const sql = `INSERT INTO people(name) values("${randomName}")`;
+    connection.query(sql);
+
+    connection.query('select * from people;',function(err, rows, fields) {
+        if (err) throw err;
+        let result = "<h1>Full Cycle Rocks!</h1><br><ul>";
+        rows.forEach(linha => {
+            result += `<li>${linha.name}</li>`
+        });
+        result += "</ul>"
+        res.send(result);
+    });
+    connection.end();
 })
 
 app.listen(port, ()=> {
